@@ -8,14 +8,14 @@
 
 ## Shell Commands
 
-        s <reference_name> <file> - Saves the path to the file as "reference_name"
-        s <reference_name> - Saves the path as "reference_name"
-        g <reference_name> - Jump to referenced path
-        e <reference_name> - Open reference file in vim
-        o <reference_name> - Open reference file in default program
-        p <reference_name> - Prints the file associated with "reference_name"
-        d <reference_name> - Deletes the reference
-        l                  - Lists all available references
+    s <reference_name> <file> - Saves the path to the file as "reference_name"
+    s <reference_name> - Saves the path as "reference_name"
+    g <reference_name> - Jump to referenced path
+    e <reference_name> - Open reference file in vim
+    o <reference_name> - Open reference file in default program
+    p <reference_name> - Prints the file associated with "reference_name"
+    d <reference_name> - Deletes the reference
+    l                  - Lists all available references
 
 ## Example 1
 
