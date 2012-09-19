@@ -1,0 +1,174 @@
+# USAGE:
+# s referencename file - saves the curr dir as referencename
+# sv referencename - jumps to the that reference
+# sv b[TAB] - tab completion is available
+# sp referencename - prints the reference
+# sp b[TAB] - tab completion is available
+# sd referencename - deletes the reference
+# sd [TAB] - tab completion is available
+# sl - list all references
+
+# setup file to store references
+if [ ! -n "$SWIFTCOMMANDLINE" ]; then
+    SWIFTCOMMANDLINE=~/.swiftcommandline
+fi
+touch $SWIFTCOMMANDLINE
+
+# save current directory to references
+function s {
+    check_help $1
+    _reference_name_valid "$@"
+    if [ -z "$2" ]; then
+        _purge_line "$SWIFTCOMMANDLINE" "export VSF_$1="
+        CURDIR=$(echo $PWD| sed "s#^$HOME#\$HOME#g")
+        echo "export VSF_$1=\"$CURDIR\"" >> $SWIFTCOMMANDLINE
+    else
+        _check_valid_filename "$@"
+        if [ -z "$exit_message" ]; then
+            _purge_line "$SWIFTCOMMANDLINE" "export VSF_$1="
+            if [ "${2:0:1}" == "/" ]; then
+                echo "export VSF_$1=\"$2\"" >> $SWIFTCOMMANDLINE
+            else
+                echo "export VSF_$1=\"$PWD/$2\"" >> $SWIFTCOMMANDLINE
+            fi
+        fi
+    fi
+}
+
+# jump to reference
+function g {
+    check_help $1
+    source $SWIFTCOMMANDLINE
+    cd "$(eval $(echo echo $(echo \$VSF_$1)))"
+}
+
+# edit reference
+function e {
+    check_help $1
+    source $SWIFTCOMMANDLINE
+    vim "$(eval $(echo echo $(echo \$VSF_$1)))"
+}
+
+# edit reference
+function o {
+    check_help $1
+    source $SWIFTCOMMANDLINE
+    open "$(eval $(echo echo $(echo \$VSF_$1)))"
+}
+
+# print reference
+function p {
+    check_help $1
+    source $SWIFTCOMMANDLINE
+    echo "$(eval $(echo echo $(echo \$VSF_$1)))"
+}
+
+# delete reference
+function d {
+    check_help $1
+    _reference_name_valid "$@"
+    if [ -z "$exit_message" ]; then
+        _purge_line "$SWIFTCOMMANDLINE" "export VSF_$1="
+        unset "VSF_$1"
+    fi
+}
+
+# print out help for the forgetful
+function check_help {
+    if [ "$1" = "-h" ] || [ "$1" = "-help" ] || [ "$1" = "--help" ] ; then
+        echo ''
+        echo 's <reference_name> <file> - Saves the path to the file  as "reference_name"'
+        echo 's <reference_name> - Saves the path as "reference_name"'
+        echo 'g <reference_name> - Jump to the path specified'
+        echo 'e <reference_name> - Open reference file in vim'
+        echo 'o <reference_name> - Open reference file in default program'
+        echo 'p <reference_name> - Prints the file associated with "reference_name"'
+        echo 'd <reference_name> - Deletes the reference'
+        echo 'l                 - Lists all available references'
+        kill -SIGINT $$
+    fi
+}
+
+# list references with dirnam
+function l {
+    check_help $1
+    source $SWIFTCOMMANDLINE
+
+    # if color output is not working for you, comment out the line below '\033[1;32m' == "red"
+    env | sort | awk '/VSF_.+/{split(substr($0,5),parts,"="); printf("\033[1;31m%-20s\033[0m %s\n", parts[1], parts[2]);}'
+
+    # uncomment this line if color output is not working with the line above
+    # env | grep "^VSF_" | cut -c5- | sort |grep "^.*="
+}
+
+# list references without name
+function _sl {
+    source $SWIFTCOMMANDLINE
+    env | grep "^VSF_" | cut -c5- | sort | grep "^.*=" | cut -f1 -d "="
+}
+
+function _check_valid_filename {
+    exit_message=""
+    if [ -z $2 ]; then
+        exit_message="file name required"
+        echo $exit_message
+    fi
+}
+# validate reference name
+function _reference_name_valid {
+    exit_message=""
+    if [ -z $1 ]; then
+        exit_message="reference name required"
+        echo $exit_message
+    elif [ "$1" != "$(echo $1 | sed 's/[^A-Za-z0-9_]//g')" ]; then
+        exit_message="reference name is not valid"
+        echo $exit_message
+    fi
+}
+
+# completion command
+function _scomp {
+    local curw
+    COMPREPLY=()
+    curw=${COMP_WORDS[COMP_CWORD]}
+    COMPREPLY=($(compgen -W '`_sl`' -- $curw))
+    return 0
+}
+
+# ZSH completion command
+function _scompzsh {
+    reply=($(_sl))
+}
+
+# safe delete line from sdirs
+function _purge_line {
+    if [ -s "$1" ]; then
+        # safely create a temp file
+        t=$(mktemp -t swiftcommandline.XXXXXX) || exit 1
+        trap "rm -f -- '$t'" EXIT
+
+        # purge line
+        sed "/$2/d" "$1" > "$t"
+        mv "$t" "$1"
+
+        # cleanup temp file
+        rm -f -- "$t"
+        trap - EXIT
+    fi
+}
+
+# bind completion command for e,p,d,g to _scomp
+if [ $ZSH_VERSION ]; then
+    compctl -K _scompzsh e
+    compctl -K _scompzsh o
+    compctl -K _scompzsh g
+    compctl -K _scompzsh p
+    compctl -K _scompzsh d
+else
+    shopt -s progcomp
+    complete -F _scomp e
+    complete -F _scomp o
+    complete -F _scomp g
+    complete -F _scomp p
+    complete -F _scomp d
+fi
