@@ -1,12 +1,15 @@
 # USAGE:
-# s referencename file - saves the curr dir as referencename
-# sv referencename - jumps to the that reference
-# sv b[TAB] - tab completion is available
-# sp referencename - prints the reference
-# sp b[TAB] - tab completion is available
-# sd referencename - deletes the reference
-# sd [TAB] - tab completion is available
-# sl - list all references
+# s referencename file - saves the file as referencename
+# s referencename - saves the curr dir as referencename
+# o referencename - open file in default program
+# e referencename - edit the file in vim
+# g referencename - jumps to the that reference
+# g b[TAB] - tab completion is available
+# p referencename - prints the reference
+# p b[TAB] - tab completion is available
+# d referencename - deletes the reference
+# d [TAB] - tab completion is available
+# l - list all references
 
 # setup file to store references
 if [ ! -n "$SWIFTCOMMANDLINE" ]; then
