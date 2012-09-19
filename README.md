@@ -1,4 +1,4 @@
-### Swiftcommandline is a quick way to edit commonly referenced files in vim
+### Swiftcommandline is a quick way to edit, go to, or open commonly referenced files or folders
 
 ## Install
 
