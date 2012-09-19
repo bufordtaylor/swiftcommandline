@@ -2,6 +2,8 @@
 
 ## Install
 
+[github - swiftcommandline](https://www.github.com/bufordtaylor/swiftcommandline)
+
 1. git clone git://github.com/bufordtaylor/swiftcommandline.git
 2. make install
 3. source **~/.local/bin/swiftcommandline.sh** from within your **~.bash\_profile** or **~/.bashrc** file
