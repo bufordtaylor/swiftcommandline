@@ -1,10 +1,10 @@
-### Swiftvim is a quick way to edit commonly referenced files in vim
+### Swiftcommandline is a quick way to edit commonly referenced files in vim
 
 ## Install
 
-1. git clone git://github.com/bufordtaylor/swiftvim.git
+1. git clone git://github.com/bufordtaylor/swiftcommandline.git
 2. make install
-3. source **~/.local/bin/swiftvim.sh** from within your **~.bash\_profile** or **~/.bashrc** file
+3. source **~/.local/bin/swiftcommandline.sh** from within your **~.bash\_profile** or **~/.bashrc** file
 
 ## Shell Commands
 
