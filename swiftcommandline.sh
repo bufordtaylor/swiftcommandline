@@ -55,7 +55,7 @@ function s {
         _check_valid_filename "$@"
         if [ -z "$exit_message" ]; then
             _purge_line "$SWIFTCOMMANDLINE" "export VSF_$1="
-            if [ "${2:0:1}" == "/" ]; then
+            if [[ "${2:0:1}" == "/" ]]; then
                 echo "export VSF_$1=\"$2\"" >> $SWIFTCOMMANDLINE
             else
                 echo "export VSF_$1=\"$PWD/$2\"" >> $SWIFTCOMMANDLINE
