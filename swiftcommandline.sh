@@ -45,61 +45,56 @@ touch $SWIFTCOMMANDLINE
 
 # save current directory to references
 function s {
-    check_help $1
-    _reference_name_valid "$@"
+    check_help $1 && return 0
+    _reference_name_valid "$@" || return 1
+
     if [ -z "$2" ]; then
-        _purge_line "$SWIFTCOMMANDLINE" "export VSF_$1="
-        CURDIR=$(echo $PWD| sed "s#^$HOME#\$HOME#g")
-        echo "export VSF_$1=\"$CURDIR\"" >> $SWIFTCOMMANDLINE
+        local dir=$(echo $PWD | sed "s#^$HOME#\$HOME#g")
+    elif [[ "${2:0:1}" == "/" ]]; then
+        local dir="$2"
     else
-        _check_valid_filename "$@"
-        if [ -z "$exit_message" ]; then
-            _purge_line "$SWIFTCOMMANDLINE" "export VSF_$1="
-            if [[ "${2:0:1}" == "/" ]]; then
-                echo "export VSF_$1=\"$2\"" >> $SWIFTCOMMANDLINE
-            else
-                echo "export VSF_$1=\"$PWD/$2\"" >> $SWIFTCOMMANDLINE
-            fi
-        fi
+        local dir="$PWD/$2"
     fi
+
+    _purge_line "$SWIFTCOMMANDLINE" "export VSF_$1="
+    echo "export VSF_$1=\"$dir\"" >> $SWIFTCOMMANDLINE
 }
 
 # jump to reference
 function g {
-    check_help $1
+    check_help $1 && return 0
     source $SWIFTCOMMANDLINE
     cd "$(eval $(echo echo $(echo \$VSF_$1)))"
 }
 
 # edit reference
 function e {
-    check_help $1
+    check_help $1 && return 0
     source $SWIFTCOMMANDLINE
     vim "$(eval $(echo echo $(echo \$VSF_$1)))"
 }
 
 # edit reference
 function o {
-    check_help $1
+    check_help $1 && return 0
     source $SWIFTCOMMANDLINE
     open "$(eval $(echo echo $(echo \$VSF_$1)))"
 }
 
 # print reference
 function p {
-    check_help $1
+    check_help $1 && return 0
     source $SWIFTCOMMANDLINE
     echo "$(eval $(echo echo $(echo \$VSF_$1)))"
 }
 
 # delete reference
 function d {
-    check_help $1
-    _reference_name_valid "$@"
-    if [ -z "$exit_message" ]; then
-        _purge_line "$SWIFTCOMMANDLINE" "export VSF_$1="
-        unset "VSF_$1"
-    fi
+    check_help $1 && return 0
+    _reference_name_valid "$@" || return 1
+
+    _purge_line "$SWIFTCOMMANDLINE" "export VSF_$1="
+    unset "VSF_$1"
 }
 
 # print out help for the forgetful
@@ -114,13 +109,15 @@ function check_help {
         echo 'p <reference_name> - Prints the file associated with "reference_name"'
         echo 'd <reference_name> - Deletes the reference'
         echo 'l                 - Lists all available references'
-        kill -SIGINT $$
+        return 0
     fi
+
+    return 1
 }
 
 # list references with dirnam
 function l {
-    check_help $1
+    check_help $1 && return 0
     source $SWIFTCOMMANDLINE
 
     # if color output is not working for you, comment out the line below '\033[1;32m' == "red"
@@ -136,23 +133,21 @@ function _sl {
     env | grep "^VSF_" | cut -c5- | sort | grep "^.*=" | cut -f1 -d "="
 }
 
-function _check_valid_filename {
-    exit_message=""
-    if [ -z $2 ]; then
-        exit_message="file name required"
-        echo $exit_message
-    fi
-}
 # validate reference name
 function _reference_name_valid {
     exit_message=""
+
     if [ -z $1 ]; then
         exit_message="reference name required"
-        echo $exit_message
+        echo "$exit_message"
+        return 1
     elif [ "$1" != "$(echo $1 | sed 's/[^A-Za-z0-9_]//g')" ]; then
-        exit_message="reference name is not valid"
-        echo $exit_message
+        exit_message="reference name is not valid, because it is not match [A-Za-z0-9_]* regexp"
+        echo "$exit_message"
+        return 1
     fi
+
+    return 0
 }
 
 # completion command
