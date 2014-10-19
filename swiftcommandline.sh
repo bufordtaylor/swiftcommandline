@@ -56,7 +56,6 @@ function s {
         local dir="$PWD/$2"
     fi
 
-    _purge_line "$SWIFTCOMMANDLINE" "export VSF_$1="
     echo "export VSF_$1=\"$dir\"" >> $SWIFTCOMMANDLINE
 }
 
